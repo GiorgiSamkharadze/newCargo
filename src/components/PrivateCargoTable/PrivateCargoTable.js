@@ -1,46 +1,119 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import Spinner from "react-bootstrap/Spinner";
 import { IoMdPin } from "react-icons/io";
-import Card from "react-bootstrap/Card";
 
 const PrivateCargoTable = () => {
   const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const url = "localhost:5000/api/auth/cargo";
+  const url = "http://localhost:5000/api/auth/cargo";
 
   useEffect(() => {
-    setLoading(true);
-    axios
-      .get(url)
-      .then((response) => {
-        setData(response.data);
+    const getData = async () => {
+      setLoading(true);
+      await axios(url, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
       })
-      .catch((err) => {
-        setError(err);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
+        .then((response) => {
+          setData(response.data);
+        })
+        .catch((err) => {
+          setError(err);
+        })
+        .finally(() => {
+          setLoading(false);
+        });
+    };
+    getData();
   }, [url]);
-  console.log(data.cargos.TrackingNumber);
-  return (
-    <Card style={{ backgroundColor: "#f7faff" }}>
-      <div className="w-85 mx-auto my-10">
-        <div className="card card-outline-secondary">
-          <div className="card-body d-flex justify-content-start ">
-            <h3 className="mb-0 pr-2">Receiver</h3>
-            <IoMdPin style={{ marginBottom: "2", transform: "scale(1.4)" }} />
-          </div>
-          <div className=" d-flex flex-column justify-content-start mb-0">
-            <p style={{ fontSize: "1rem" }}>{/* {name} */}ვასილ ასეიშვილი</p>
-            <p style={{ fontSize: "1rem" }}>{/* {phone}*/} 551607077</p>
-            <p style={{ fontSize: "1rem" }}>{/* {address} */} თბილისი GE</p>
-          </div>
+
+  return loading ? (
+    <div className="d-flex justify-content-center align-items-center m-10">
+      <Spinner animation="border" size="sm" />
+    </div>
+  ) : (
+    <div>
+      {data.cargos?.map((cargo, i) => (
+        <div
+          className="w-85 mx-auto my-10"
+          style={{ backgroundColor: "#f7faff" }}
+          key={i}
+        >
+          <table className="table">
+            <thead>
+              <tr>
+                <th scope="col" className="w-20">
+                  Tracking Number
+                </th>
+                <th scope="col">
+                  Receiver{" "}
+                  <IoMdPin
+                    style={{ marginBottom: "2", transform: "scale(1.4)" }}
+                  />
+                </th>
+                <th scope="col">
+                  Sender{" "}
+                  <IoMdPin
+                    style={{ marginBottom: "2", transform: "scale(1.4)" }}
+                  />
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td className="w-20">{cargo.TrackingNumber}</td>
+                <td className="w-20">
+                  {" "}
+                  <p>{cargo.ShippingSpecs.receiverInformation.name}</p>
+                  <p>{cargo.ShippingSpecs.receiverInformation.email}</p>
+                  <p>{cargo.ShippingSpecs.receiverInformation.phone}</p>
+                  <p>
+                    {
+                      cargo.ShippingSpecs.receiverInformation.address
+                        .countryCode
+                    }{" "}
+                    {
+                      cargo.ShippingSpecs.receiverInformation.address
+                        .addressLine1
+                    }{" "}
+                    {
+                      cargo.ShippingSpecs.receiverInformation.address
+                        .addressLine2
+                    }{" "}
+                    {cargo.ShippingSpecs.receiverInformation.address.postalCode}
+                  </p>
+                </td>
+                <td className="w-20">
+                  {" "}
+                  <p>{cargo.ShippingSpecs.receiverInformation.name}</p>
+                  <p>{cargo.ShippingSpecs.receiverInformation.email}</p>
+                  <p>{cargo.ShippingSpecs.receiverInformation.phone}</p>
+                  <p>
+                    {
+                      cargo.ShippingSpecs.receiverInformation.address
+                        .countryCode
+                    }{" "}
+                    {
+                      cargo.ShippingSpecs.receiverInformation.address
+                        .addressLine1
+                    }{" "}
+                    {
+                      cargo.ShippingSpecs.receiverInformation.address
+                        .addressLine2
+                    }{" "}
+                    {cargo.ShippingSpecs.receiverInformation.address.postalCode}
+                  </p>
+                </td>
+                <td>@mdo</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
-      </div>
-    </Card>
+      ))}
+    </div>
   );
 };
 
